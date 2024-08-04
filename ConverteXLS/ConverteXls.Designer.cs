@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             folderBrowserPlanilhas = new FolderBrowserDialog();
             txt_Path = new TextBox();
             btnBuscar = new Button();
@@ -37,19 +38,24 @@
             btn_converter = new Button();
             chk_deletaOld = new CheckBox();
             btnDeletar = new Button();
-            btn_DeletaPdf = new Button();
+            btn_DeletaExtensao = new Button();
+            txt_extensionDelete = new TextBox();
+            label3 = new Label();
+            lbl_Status = new Label();
+            lbl_Timer = new Label();
+            timer = new System.Windows.Forms.Timer(components);
             SuspendLayout();
             // 
             // txt_Path
             // 
-            txt_Path.Location = new Point(227, 188);
+            txt_Path.Location = new Point(227, 106);
             txt_Path.Name = "txt_Path";
             txt_Path.Size = new Size(285, 23);
             txt_Path.TabIndex = 2;
             // 
             // btnBuscar
             // 
-            btnBuscar.Location = new Point(518, 188);
+            btnBuscar.Location = new Point(518, 106);
             btnBuscar.Name = "btnBuscar";
             btnBuscar.Size = new Size(75, 23);
             btnBuscar.TabIndex = 3;
@@ -68,7 +74,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(227, 170);
+            label1.Location = new Point(227, 88);
             label1.Name = "label1";
             label1.Size = new Size(190, 15);
             label1.TabIndex = 1;
@@ -78,7 +84,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Black", 18F);
-            label2.Location = new Point(261, 9);
+            label2.Location = new Point(263, 9);
             label2.Name = "label2";
             label2.Size = new Size(279, 32);
             label2.TabIndex = 0;
@@ -86,7 +92,7 @@
             // 
             // btn_converter
             // 
-            btn_converter.Location = new Point(298, 271);
+            btn_converter.Location = new Point(309, 166);
             btn_converter.Name = "btn_converter";
             btn_converter.Size = new Size(152, 66);
             btn_converter.TabIndex = 5;
@@ -97,7 +103,7 @@
             // chk_deletaOld
             // 
             chk_deletaOld.AutoSize = true;
-            chk_deletaOld.Location = new Point(298, 255);
+            chk_deletaOld.Location = new Point(309, 141);
             chk_deletaOld.Name = "chk_deletaOld";
             chk_deletaOld.Size = new Size(163, 19);
             chk_deletaOld.TabIndex = 4;
@@ -106,7 +112,7 @@
             // 
             // btnDeletar
             // 
-            btnDeletar.Location = new Point(214, 343);
+            btnDeletar.Location = new Point(309, 238);
             btnDeletar.Name = "btnDeletar";
             btnDeletar.Size = new Size(152, 66);
             btnDeletar.TabIndex = 6;
@@ -114,22 +120,69 @@
             btnDeletar.UseVisualStyleBackColor = true;
             btnDeletar.Click += btnDeletar_Click;
             // 
-            // btn_DeletaPdf
+            // btn_DeletaExtensao
             // 
-            btn_DeletaPdf.Location = new Point(372, 343);
-            btn_DeletaPdf.Name = "btn_DeletaPdf";
-            btn_DeletaPdf.Size = new Size(152, 66);
-            btn_DeletaPdf.TabIndex = 7;
-            btn_DeletaPdf.Text = "Deletar pdf sinapi";
-            btn_DeletaPdf.UseVisualStyleBackColor = true;
-            btn_DeletaPdf.Click += btn_DeletaPdf_Click;
+            btn_DeletaExtensao.Location = new Point(636, 238);
+            btn_DeletaExtensao.Name = "btn_DeletaExtensao";
+            btn_DeletaExtensao.Size = new Size(152, 66);
+            btn_DeletaExtensao.TabIndex = 7;
+            btn_DeletaExtensao.Text = "Deletar arquivos de alguma extensão";
+            btn_DeletaExtensao.UseVisualStyleBackColor = true;
+            btn_DeletaExtensao.Click += btn_DeletaExtensao_Click;
+            // 
+            // txt_extensionDelete
+            // 
+            txt_extensionDelete.Location = new Point(636, 211);
+            txt_extensionDelete.Name = "txt_extensionDelete";
+            txt_extensionDelete.PlaceholderText = "Ex.: pdf";
+            txt_extensionDelete.Size = new Size(152, 23);
+            txt_extensionDelete.TabIndex = 8;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(636, 193);
+            label3.Name = "label3";
+            label3.Size = new Size(129, 15);
+            label3.TabIndex = 9;
+            label3.Text = "Extensão a ser deletada";
+            // 
+            // lbl_Status
+            // 
+            lbl_Status.AutoSize = true;
+            lbl_Status.Location = new Point(388, 397);
+            lbl_Status.MinimumSize = new Size(400, 0);
+            lbl_Status.Name = "lbl_Status";
+            lbl_Status.Size = new Size(400, 15);
+            lbl_Status.TabIndex = 10;
+            lbl_Status.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // lbl_Timer
+            // 
+            lbl_Timer.AutoSize = true;
+            lbl_Timer.Location = new Point(12, 397);
+            lbl_Timer.MinimumSize = new Size(100, 0);
+            lbl_Timer.Name = "lbl_Timer";
+            lbl_Timer.Size = new Size(100, 15);
+            lbl_Timer.TabIndex = 11;
+            lbl_Timer.Text = "00:00:00";
+            lbl_Timer.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // timer
+            // 
+            timer.Interval = 1;
+            timer.Tick += timer_Tick;
             // 
             // ConverteXls
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(btn_DeletaPdf);
+            Controls.Add(lbl_Timer);
+            Controls.Add(lbl_Status);
+            Controls.Add(label3);
+            Controls.Add(txt_extensionDelete);
+            Controls.Add(btn_DeletaExtensao);
             Controls.Add(btnDeletar);
             Controls.Add(chk_deletaOld);
             Controls.Add(btn_converter);
@@ -138,6 +191,7 @@
             Controls.Add(pgBar);
             Controls.Add(btnBuscar);
             Controls.Add(txt_Path);
+            MaximizeBox = false;
             Name = "ConverteXls";
             Text = "Conversor de planilha";
             ResumeLayout(false);
@@ -155,6 +209,11 @@
         private Button btn_converter;
         private CheckBox chk_deletaOld;
         private Button btnDeletar;
-        private Button btn_DeletaPdf;
+        private Button btn_DeletaExtensao;
+        private TextBox txt_extensionDelete;
+        private Label label3;
+        private Label lbl_Status;
+        private Label lbl_Timer;
+        private System.Windows.Forms.Timer timer;
     }
 }

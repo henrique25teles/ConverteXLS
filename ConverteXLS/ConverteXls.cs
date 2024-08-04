@@ -13,6 +13,8 @@ namespace ConverteXLS
             InitializeComponent();
         }
 
+
+
         private void btnBuscar_Click(object sender, EventArgs e)
         {
             var result = folderBrowserPlanilhas.ShowDialog();
@@ -57,22 +59,31 @@ namespace ConverteXLS
 
         private void BloqueiaCamposDaTela()
         {
+            stopwatch.Reset();
+            timer.Enabled = true;
+
             this.Cursor = Cursors.WaitCursor;
             txt_Path.Enabled = false;
             btnBuscar.Enabled = false;
             btnDeletar.Enabled = false;
+            btn_DeletaExtensao.Enabled = false;
             btn_converter.Enabled = false;
             chk_deletaOld.Enabled = false;
         }
 
         private void DesbloqueiaCamposDaTela()
         {
+            stopwatch.Stop();
+            timer.Enabled = false;
+            lbl_Status.Text = "";
+
             this.Cursor = Cursors.Default;
             txt_Path.Enabled = true;
             btnBuscar.Enabled = true;
             btnDeletar.Enabled = true;
+            btn_DeletaExtensao.Enabled = true;
             btn_converter.Enabled = true;
-            chk_deletaOld.Enabled = false;
+            chk_deletaOld.Enabled = true;
         }
 
         private void BuscaArquivosParaConverter(string path, Queue<string> lista)
@@ -92,9 +103,9 @@ namespace ConverteXLS
             }
         }
 
-        private void BuscaPDFsParaDeletar(string path, Queue<string> lista)
+        private void BuscaArquivosParaDeletar(string path, string extension, Queue<string> lista)
         {
-            var files = Directory.GetFiles(path).Where(x => x.ToLower().EndsWith("pdf"));
+            var files = Directory.GetFiles(path).Where(x => x.ToLower().EndsWith(extension.ToLower()));
 
             foreach (var file in files)
             {
@@ -105,7 +116,7 @@ namespace ConverteXLS
 
             foreach (var folder in folders)
             {
-                BuscaPDFsParaDeletar(folder, lista);
+                BuscaArquivosParaDeletar(folder, extension, lista);
             }
         }
 
@@ -140,6 +151,9 @@ namespace ConverteXLS
             {
                 var planilhaPath = lista.Dequeue();
 
+                lbl_Status.Text = $"Convertendo arquivo: {Path.GetFileName(planilhaPath)}";
+                Application.DoEvents();
+
                 FileStream inputData = new FileStream(planilhaPath, FileMode.Open, FileAccess.ReadWrite);
 
                 using (ExcelEngine excelEngine = new ExcelEngine())
@@ -159,6 +173,9 @@ namespace ConverteXLS
                     workbook.SaveAs(fileStream);
                     fileStream.Close();
                     fileStream.Dispose();
+
+                    lbl_Status.Text = $"Removendo marca d'água: {Path.GetFileName(planilhaPath)}";
+                    Application.DoEvents();
 
                     RemoveMarcasDagua(outputFile);
                 }
@@ -237,18 +254,17 @@ namespace ConverteXLS
             {
                 var planilhaPath = lista.Dequeue();
 
+                lbl_Status.Text = $"Deletando arquivo: {Path.GetFileName(planilhaPath)}";
+
+                Application.DoEvents();
+
                 File.Delete(planilhaPath);
 
                 pgBar.Value++;
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void btn_DeletaPdf_Click(object sender, EventArgs e)
+        private void btn_DeletaExtensao_Click(object sender, EventArgs e)
         {
             try
             {
@@ -261,10 +277,23 @@ namespace ConverteXLS
                     throw new Exception("Não existe esse caminho no sistema");
                 }
 
-                var caminhoPdfs = new Queue<string>();
+                if (string.IsNullOrWhiteSpace(txt_extensionDelete.Text))
+                {
+                    throw new Exception("Informe a extensão que deseja deletar");
+                }
 
-                BuscaPDFsParaDeletar(caminho, caminhoPdfs);
-                DeletaArquivos(caminhoPdfs);
+                var caminhoArquivos = new Queue<string>();
+
+                var extensao = txt_extensionDelete.Text;
+
+                BuscaArquivosParaDeletar(caminho, extensao, caminhoArquivos);
+
+                if (!caminhoArquivos.Any())
+                {
+                    throw new Exception("Não encontrado nenhum arquivo com essa extensão para deletar");
+                }
+
+                DeletaArquivos(caminhoArquivos);
 
                 MessageBox.Show("Deletado com sucesso", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
 
@@ -278,6 +307,20 @@ namespace ConverteXLS
                 DesbloqueiaCamposDaTela();
                 pgBar.Value = 0;
             }
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            var elapsed = string.Format(
+                "{0}:{1}:{2}",
+                stopwatch.Elapsed.Hours.ToString().PadLeft(2, '0'),
+                stopwatch.Elapsed.Minutes.ToString().PadLeft(2, '0'),
+                stopwatch.Elapsed.Seconds.ToString().PadLeft(2, '0')
+            );
+
+            lbl_Timer.Text = elapsed;
+
+            Application.DoEvents();
         }
     }
 }
