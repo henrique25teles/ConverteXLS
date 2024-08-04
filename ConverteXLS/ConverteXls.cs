@@ -59,31 +59,37 @@ namespace ConverteXLS
 
         private void BloqueiaCamposDaTela()
         {
-            stopwatch.Reset();
+            stopwatch.Start();
             timer.Enabled = true;
 
             this.Cursor = Cursors.WaitCursor;
+
+            chk_deletaOld.Enabled = false;
             txt_Path.Enabled = false;
             btnBuscar.Enabled = false;
             btnDeletar.Enabled = false;
-            btn_DeletaExtensao.Enabled = false;
             btn_converter.Enabled = false;
-            chk_deletaOld.Enabled = false;
+
+            txt_extensionDelete.Enabled = false;
+            btn_DeletaExtensao.Enabled = false;
         }
 
         private void DesbloqueiaCamposDaTela()
         {
-            stopwatch.Stop();
+            stopwatch.Reset();
             timer.Enabled = false;
             lbl_Status.Text = "";
 
             this.Cursor = Cursors.Default;
+
+            chk_deletaOld.Enabled = true;
             txt_Path.Enabled = true;
             btnBuscar.Enabled = true;
             btnDeletar.Enabled = true;
-            btn_DeletaExtensao.Enabled = true;
             btn_converter.Enabled = true;
-            chk_deletaOld.Enabled = true;
+
+            txt_extensionDelete.Enabled = true;
+            btn_DeletaExtensao.Enabled = true;
         }
 
         private void BuscaArquivosParaConverter(string path, Queue<string> lista)
@@ -154,36 +160,52 @@ namespace ConverteXLS
                 lbl_Status.Text = $"Convertendo arquivo: {Path.GetFileName(planilhaPath)}";
                 Application.DoEvents();
 
-                FileStream inputData = new FileStream(planilhaPath, FileMode.Open, FileAccess.ReadWrite);
-
-                using (ExcelEngine excelEngine = new ExcelEngine())
+                using (var inputData = new FileStream(planilhaPath, FileMode.Open, FileAccess.ReadWrite))
                 {
-                    IApplication application = excelEngine.Excel;
-                    application.DefaultVersion = ExcelVersion.Xlsx;
-                    IWorkbook workbook = application.Workbooks.Open(inputData);
-                    IWorksheets worksheets = workbook.Worksheets;
+                    using (ExcelEngine excelEngine = new ExcelEngine())
+                    {
+                        IApplication application = excelEngine.Excel;
+                        application.DefaultVersion = ExcelVersion.Xlsx;
+                        IWorkbook workbook = application.Workbooks.Open(inputData);
+                        IWorksheets worksheets = workbook.Worksheets;
 
-                    workbook.Version = ExcelVersion.Xlsx;
+                        workbook.Version = ExcelVersion.Xlsx;
 
-                    var outputDirectory = Path.GetDirectoryName(planilhaPath);
-                    var outputFilename = Path.GetFileNameWithoutExtension(planilhaPath) + ".xlsx";
-                    var outputFile = Path.Combine(outputDirectory, outputFilename);
+                        var outputDirectory = Path.GetDirectoryName(planilhaPath);
+                        var outputFilename = Path.GetFileNameWithoutExtension(planilhaPath) + ".xlsx";
+                        var outputFile = Path.Combine(outputDirectory, outputFilename);
 
-                    using var fileStream = new FileStream(outputFile, FileMode.Create, FileAccess.ReadWrite);
-                    workbook.SaveAs(fileStream);
-                    fileStream.Close();
-                    fileStream.Dispose();
+                        using (var fileStream = new FileStream(outputFile, FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            workbook.SaveAs(fileStream);
+                            
+                            fileStream.Close();
+                            fileStream.Dispose();
 
-                    lbl_Status.Text = $"Removendo marca d'água: {Path.GetFileName(planilhaPath)}";
-                    Application.DoEvents();
+                            inputData.Close();
+                            inputData.Dispose();
 
-                    RemoveMarcasDagua(outputFile);
+                            workbook.Close();
+
+                            lbl_Status.Text = $"Removendo marca d'água: {Path.GetFileName(planilhaPath)}";
+                            Application.DoEvents();
+
+                            RemoveMarcasDagua(outputFile);
+                        }
+                    }
+
+                    
+
+                    if (chk_deletaOld.Checked)
+                    {
+                        lbl_Status.Text = $"Deletando arquivo: {Path.GetFileName(planilhaPath)}";
+                        Application.DoEvents();
+
+                        File.Delete(planilhaPath);
+                    }
+
                 }
 
-                if (chk_deletaOld.Checked)
-                {
-                    File.Delete(planilhaPath);
-                }
 
                 pgBar.Value++;
             }
@@ -205,7 +227,12 @@ namespace ConverteXLS
                     lastRow.Delete();
 
                     workbook.Save();
+
+                    workbook.Dispose();
                 }
+
+                stream.Close();
+                stream.Dispose();
             }
         }
 

@@ -150,10 +150,10 @@
             // lbl_Status
             // 
             lbl_Status.AutoSize = true;
-            lbl_Status.Location = new Point(388, 397);
-            lbl_Status.MinimumSize = new Size(400, 0);
+            lbl_Status.Location = new Point(188, 397);
+            lbl_Status.MinimumSize = new Size(600, 0);
             lbl_Status.Name = "lbl_Status";
-            lbl_Status.Size = new Size(400, 15);
+            lbl_Status.Size = new Size(600, 15);
             lbl_Status.TabIndex = 10;
             lbl_Status.TextAlign = ContentAlignment.MiddleRight;
             // 
